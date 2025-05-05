@@ -1,0 +1,15 @@
+C:\proyecto pw2022\Blog\Net8\SecurityApi\bin\Release\net8.0\publish\SecurityApi.exe
+C:\proyecto pw2022\Blog\Net8\SecurityApi\bin\Release\net8.0\publish\appsettings.Development.json
+C:\proyecto pw2022\Blog\Net8\SecurityApi\bin\Release\net8.0\publish\appsettings.json
+C:\proyecto pw2022\Blog\Net8\SecurityApi\bin\Release\net8.0\publish\SecurityApi.dll
+C:\proyecto pw2022\Blog\Net8\SecurityApi\bin\Release\net8.0\publish\SecurityApi.deps.json
+C:\proyecto pw2022\Blog\Net8\SecurityApi\bin\Release\net8.0\publish\SecurityApi.runtimeconfig.json
+C:\proyecto pw2022\Blog\Net8\SecurityApi\bin\Release\net8.0\publish\SecurityApi.pdb
+C:\proyecto pw2022\Blog\Net8\SecurityApi\bin\Release\net8.0\publish\Microsoft.AspNetCore.JsonPatch.dll
+C:\proyecto pw2022\Blog\Net8\SecurityApi\bin\Release\net8.0\publish\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
+C:\proyecto pw2022\Blog\Net8\SecurityApi\bin\Release\net8.0\publish\Microsoft.OpenApi.dll
+C:\proyecto pw2022\Blog\Net8\SecurityApi\bin\Release\net8.0\publish\Newtonsoft.Json.dll
+C:\proyecto pw2022\Blog\Net8\SecurityApi\bin\Release\net8.0\publish\Newtonsoft.Json.Bson.dll
+C:\proyecto pw2022\Blog\Net8\SecurityApi\bin\Release\net8.0\publish\Swashbuckle.AspNetCore.Swagger.dll
+C:\proyecto pw2022\Blog\Net8\SecurityApi\bin\Release\net8.0\publish\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\proyecto pw2022\Blog\Net8\SecurityApi\bin\Release\net8.0\publish\Swashbuckle.AspNetCore.SwaggerUI.dll

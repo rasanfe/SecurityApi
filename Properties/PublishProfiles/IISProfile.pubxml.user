@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <EncryptedPassword>eyJCb2R5IjoiNTYyN1dDZXQ5ODBkUEgvRXcxMTJpUT09IiwiSGVhZGVyIjp7IlRpbWVzdGFtcCI6MTc0NjAyNzkzOSwiU2lnbmF0dXJlIjoiREVGQzhGMkVDMjkyNEUwOTFFN0UxNTAxMUM2Q0RDQzIifX0=</EncryptedPassword>
+    <History>True|2025-04-30T17:45:43.8719372+02:00;False|2025-04-30T17:45:14.4056857+02:00;False|2025-04-30T17:41:12.7813136+02:00;False|2025-04-30T17:40:59.5288388+02:00;False|2025-04-30T17:40:42.3101519+02:00;False|2025-04-30T17:40:04.5425198+02:00;False|2025-04-30T17:39:16.1402546+02:00;False|2025-04-30T17:38:51.5860754+02:00;False|2025-04-30T17:38:06.1101788+02:00;False|2025-04-30T17:37:54.3071124+02:00;False|2025-04-30T17:37:07.9187092+02:00;</History>
+  </PropertyGroup>
+</Project>

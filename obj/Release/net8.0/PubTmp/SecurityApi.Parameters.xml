@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <parameter name="IIS Web Application Name" description="" value="encryptgeneratorapi" tags="IisApp">
+    <parameterEntry kind="ProviderPath" scope="IisApp" match="^C:\\proyecto\ pw2022\\Blog\\Net8\\SecurityApi\\bin\\Release\\net8\.0\\publish\\$" />
+  </parameter>
+</parameters>
