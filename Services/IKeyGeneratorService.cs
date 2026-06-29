@@ -1,17 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace SecurityApi.Services
 {
+    /// <summary>
+    /// Contrato del generador/validador de claves robustas. Se registra como Singleton
+    /// (ver Program.cs): una sola instancia para toda la app.
+    /// </summary>
     public interface IKeyGeneratorService
     {
-        public bool Validate(string password);
-        public string Generate();
-        public void SetTotalChars(int totalCharacters);
-        //private string Shuffle(string str, Random random);
+        /// <summary>Comprueba si <paramref name="password"/> cumple las reglas de complejidad.</summary>
+        bool Validate(string password);
 
-        //private string ToBase64Url(string input);
+        /// <summary>Genera una clave nueva que cumple esas reglas.</summary>
+        string Generate();
+
+        /// <summary>Ajusta la longitud mínima exigida a las claves.</summary>
+        void SetTotalChars(int totalCharacters);
     }
 }

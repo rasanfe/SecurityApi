@@ -1,51 +1,63 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json.Linq;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
 
 namespace SecurityApi.Services.Imp
 {
+    /// <summary>
+    /// Implementación del cifrado simétrico <b>AES</b> (<see cref="ISecurityService"/>).
+    /// Pequeño glosario para los que venís de PowerBuilder:
+    /// <list type="bullet">
+    ///   <item><description><b>AES</b>: algoritmo simétrico (la MISMA clave cifra y descifra).</description></item>
+    ///   <item><description><b>Key</b>: la clave secreta. Aquí AES-128, o sea 16 bytes.</description></item>
+    ///   <item><description><b>IV</b> (vector de inicialización): 16 bytes que "aleatorizan" el cifrado
+    ///     para que el mismo texto no produzca siempre el mismo resultado.</description></item>
+    ///   <item><description><b>CBC</b>: modo de encadenamiento de bloques; <b>PKCS7</b>: relleno
+    ///     del último bloque hasta completar los 16 bytes.</description></item>
+    /// </list>
+    /// Clave e IV deben coincidir EXACTAMENTE al cifrar y al descifrar, o el resultado es basura.
+    /// </summary>
     public class SecurityService : ISecurityService
     {
+        /// <inheritdoc/>
         public string Encrypt(string source, string key, string iv)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(source)) return "";
 
-                //Corregimos tamaños Key y IV.
+                // AES-128 necesita clave e IV de 16 bytes EXACTOS. Si llegan más cortos,
+                // los rellenamos a 16 (truco didáctico para no obligar al cliente a medir;
+                // en producción usaríais claves/IV de longitud correcta de origen).
                 key = key.PadRight(16, '*');
                 iv = iv.PadRight(16, '0');
-                
+
                 byte[] InitialVectorBytes = Encoding.UTF8.GetBytes(iv);
                 byte[] keyBytes = Encoding.UTF8.GetBytes(key);
-                byte[] plainTextBytes = Encoding.UTF8.GetBytes(source);
                 byte[] encrypted;
-                
+
+                // Aes.Create() nos da la implementación de AES del sistema. Lo configuramos:
                 var aes = Aes.Create();
                 aes.KeySize = 128;
                 aes.Key = keyBytes;
                 aes.IV = InitialVectorBytes;
                 aes.Mode = CipherMode.CBC;
                 aes.Padding = PaddingMode.PKCS7;
-                
-                
-                // Create an encryptor to perform the stream transform.
+
+                // El cifrado se hace "en streaming": texto → CryptoStream → MemoryStream.
+                // Los 'using' garantizan que cada stream se cierra/vacía al salir (libera
+                // recursos), parecido al DESTROY de PowerBuilder pero automático.
                 using (var encryptor = aes.CreateEncryptor())
                 {
-                    // Create the streams used for encryption.
                     using (var msEncrypt = new MemoryStream())
                     {
                         using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
                         {
                             using (var swEncrypt = new StreamWriter(csEncrypt))
                             {
-                                //Write all data to the stream.
+                                // Escribimos el texto; al cerrar el StreamWriter se vuelca
+                                // todo cifrado al MemoryStream.
                                 swEncrypt.Write(source);
                             }
                             encrypted = msEncrypt.ToArray();
@@ -54,71 +66,69 @@ namespace SecurityApi.Services.Imp
                 }
 
                 string sourceFinal = Convert.ToBase64String(encrypted);
-                
-                //Pasar a Base64URL:
+
+                // Pasamos a Base64URL para que viaje sin problemas por URL/JSON.
                 sourceFinal = sourceFinal.Replace("+", "-").Replace("/", "_").Replace("=", "");
-                
+
                 return sourceFinal;
             }
             catch (Exception ex)
             {
+                // Patrón didáctico: devolvemos el mensaje en vez de propagar la excepción.
                 return ex.Message;
             }
-            
         }
+
+        /// <inheritdoc/>
         public string Decrypt(string source, string key, string iv)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(source)) return "";
 
-                //Corregimos tamaños Key y IV.
+                // Mismo ajuste de tamaños que en Encrypt: clave e IV de 16 bytes.
                 key = key.PadRight(16, '*');
                 iv = iv.PadRight(16, '0');
-                
+
                 byte[] InitialVectorBytes = Encoding.UTF8.GetBytes(iv);
                 byte[] keyBytes = Encoding.UTF8.GetBytes(key);
-                
-                //Pasamos el De Base64URL a Base64
+
+                // El texto cifrado llega en Base64URL; lo devolvemos a Base64 estándar
+                // y reponemos el relleno '=' (la longitud debe ser múltiplo de 4).
                 source = source.Replace("-", "+").Replace("_", "/");
                 while (source.Length % 4 != 0)
                 {
                     source += "=";
                 }
 
-                // Convertir el mensaje cifrado de base64 a bytes
+                // Y de Base64 a los bytes cifrados de verdad.
                 byte[] cipherBytes = Convert.FromBase64String(source);
-                
+
                 var aes = Aes.Create();
                 aes.KeySize = 128;
                 aes.Key = keyBytes;
                 aes.IV = InitialVectorBytes;
                 aes.Mode = CipherMode.CBC;
                 aes.Padding = PaddingMode.PKCS7;
-                
-                
+
                 string decrypted;
-                
-                //Create a decryptor to perform the stream transform.
+
+                // Descifrado en streaming, el camino inverso al de Encrypt.
                 using (var decryptor = aes.CreateDecryptor())
                 {
-                    // Create the streams used for decryption.
                     using (var msDecrypt = new MemoryStream(cipherBytes))
                     {
                         using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
                         {
                             using (var srDecrypt = new StreamReader(csDecrypt))
                             {
-                                // Read the decrypted bytes from the decrypting stream
-                                // and place them in a string.
+                                // Leemos del stream ya descifrado el texto original.
                                 decrypted = srDecrypt.ReadToEnd();
                             }
                         }
                     }
                 }
 
-
-                //decrypted = _coderservice.ToBase64Url(decrypted);
                 return decrypted;
             }
             catch (Exception ex)
@@ -126,35 +136,37 @@ namespace SecurityApi.Services.Imp
                 return ex.Message;
             }
         }
+
+        /// <inheritdoc/>
         public bool GetToken(string token, string masterKey, string masterIv, ref string key, ref string iv)
         {
-            //Corregimos tamaños MasterKey y MasterIv.
+            // La clave maestra también se ajusta a 16 bytes.
             masterKey = masterKey.PadRight(16, '*');
             masterIv = masterIv.PadRight(16, '0');
-            
+
             if (string.IsNullOrWhiteSpace(token) ||
                 string.IsNullOrWhiteSpace(masterKey) ||
                 string.IsNullOrWhiteSpace(masterIv)) return false;
 
             try
             {
+                // El token NO es más que un JSON { key, IV } cifrado con la clave maestra.
+                // Lo desciframos reutilizando el propio Decrypt...
                 string json = Decrypt(token, masterKey, masterIv);
-                
-                // Parsear la cadena JSON utilizando JObject
+
+                // ...y extraemos de su interior la clave/IV de sesión.
                 JObject jsonObject = JObject.Parse(json);
-                
-                // Obtener los valores de key y IV como cadenas
-                key = jsonObject["key"].ToString();
-                iv = jsonObject["IV"].ToString();
-                
+
+                key = jsonObject["key"]!.ToString();
+                iv = jsonObject["IV"]!.ToString();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
+                // Si el token no era válido (no descifra o no es JSON), avisamos con false.
                 return false;
             }
-            
+
             return true;
-            
         }
     }
 }
